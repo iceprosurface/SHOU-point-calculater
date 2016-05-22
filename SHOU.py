@@ -11,12 +11,27 @@ import sys
 import webbrowser
 import codecs
 import ConfigParser
+import os
+import platform
 
-cf = ConfigParser.ConfigParser()
-cf.read("./config.conf")
-#读取用户全局设置
-username = cf.get("globe","username")
-password = cf.get("globe", "password")
+sys.path.append("libs")
+#判断是否有设置文件，若无则创建默认文件夹
+if not os.path.exists("config"):
+  os.mkdir("config")
+if(os.path.isfile('./config/shou.conf')):
+  cf = ConfigParser.ConfigParser()
+  cf.read("./config/shou.conf")
+  #读取用户全局设置
+  username = cf.get("globe","username")
+  password = cf.get("globe", "password")
+else:
+  f = open("./config/shou.conf","wt")
+  print '请输入用户名'
+  username = raw_input();
+  print '请输入密码'
+  password = raw_input();
+  f.write("[globe]\nusername="+username+"\npassword="+password)
+  f.close()
 #登录的主页面  
 hosturl = 'http://urp.shou.edu.cn/'
 #post数据接收和处理的页面（我们要向这个页面发送我们构造的Post数据）  
@@ -77,11 +92,24 @@ text = re.sub(regex,upload,text)
 print text
 #打开文本
 # text = unicode(text, "utf-8")
-f = open(".\index.html","wt")
+if not os.path.exists("Tmp"):
+  os.mkdir("Tmp") 
+f = open("./Tmp/index.html","wt")
 #输出到文本
 f.write(text)
 #关闭文本
 f.close()
-#打开文件
-url = '.\index.html'
-webbrowser.open(url)
+#打开文件 
+sysstr = platform.system()
+if(sysstr =="Windows"):
+  #window情况下
+  url = "./Tmp/index.html"
+  webbrowser.open(url)
+elif(sysstr == "Linux"):
+  #linux情况下
+  url = os.path.abspath("./Tmp/index.html")
+  webbrowser.open(url, new=0, autoraise=True)
+else:
+  #其他包括mac os情况下
+  url = "file:" + os.path.abspath('./Tmp/index.html')
+  webbrowser.open(url, new=0, autoraise=True)
